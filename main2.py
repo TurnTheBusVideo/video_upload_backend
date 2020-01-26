@@ -22,7 +22,9 @@ from google.oauth2 import service_account
 
 from googleapiclient.http import MediaFileUpload
 
-scopes = ["https://www.googleapis.com/auth/youtube.upload"]
+#scopes = ["https://www.googleapis.com/auth/youtube.upload"]
+scopes = ["https://www.googleapis.com/auth/youtube.upload","https://www.googleapis.com/auth/youtubepartner-channel-audit","https://www.googleapis.com/auth/youtubepartner"]
+
 
 def main():
     # Disable OAuthlib's HTTPS verification when running locally.
@@ -42,21 +44,27 @@ def main():
     credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=scopes)
     delegated_credentials = credentials.with_subject('ann@turnthebus.org')
 
-    youtube = googleapiclient.discovery.build(
+    youtube = discovery.build(
         api_service_name, api_version, credentials=delegated_credentials)
 
     request = youtube.videos().insert(
         part="snippet, status",
+        onBehalfOfContentOwnerChannel = "UCWuYgDOn2z66ZnUNmCTP0ig",
+        onBehalfOfContentOwner = "ann@turnthebus.org",
+        #onBehalfOfContentOwner = "WuYgDOn2z66ZnUNmCTP0ig",
+        #onBehalfOfContentOwner = "c4rG0MP16xnAhMRJ4UWxTw",
+        #onBehalfOfContentOwnerChannel = "UCc4rG0MP16xnAhMRJ4UWxTw",
         body={
           "snippet": {
             "title": "Test",
             "description": "Awesome",
             "categoryId": "22",
+            "channelId": "UCWuYgDOn2z66ZnUNmCTP0ig",
             #"channelId": "UCc4rG0MP16xnAhMRJ4UWxTw",
-            #"channelId": "UCc4rG0MP16xnAhMRJ4UWxTw",
-            "onBehalfOfContentOwner" : "113851783885755510658",
+            #"onBehalfOfContentOwner" : "113851783885755510658",
             #"onBehalfOfContentOwner" : "c4rG0MP16xnAhMRJ4UWxTw",
-            "onBehalfOfContentOwnerChannel" : "UCc4rG0MP16xnAhMRJ4UWxTw",
+            #"onBehalfOfContentOwnerChannel" : "UCc4rG0MP16xnAhMRJ4UWxTw",
+
             "tags": [
               "Test"
             ]
