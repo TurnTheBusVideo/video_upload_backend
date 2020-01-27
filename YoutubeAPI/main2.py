@@ -88,8 +88,8 @@ def main():
         while response is None:
             status, response = request.next_chunk()
             if status:
-                print "Uploaded %d%%." % int(status.progress() * 100)
-            print "Upload Complete!"
+                print("Uploaded %d%%." % int(status.progress() * 100))
+            print("Upload Complete!")
         
         #response = request.execute()
         
