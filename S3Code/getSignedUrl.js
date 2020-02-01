@@ -8,9 +8,9 @@ const s3 = new AWS.S3({
   secretAccessKey: '...'
 });
 
-const getSignedUrl = (fileName) => {
+const getSignedUrl = (fileName, bucketName) => {
   const params = {
-    Bucket: gg,
+    Bucket: bucketName,
     Key: fileName
   };
   return s3.getSignedUrl('putObject', params);
