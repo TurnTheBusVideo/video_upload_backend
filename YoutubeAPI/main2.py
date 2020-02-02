@@ -24,12 +24,13 @@ from google.oauth2 import service_account
 from googleapiclient.http import MediaFileUpload
 
 #scopes = ["https://www.googleapis.com/auth/youtube.upload"]
-scopes = ["https://www.googleapis.com/auth/youtube.upload","https://www.googleapis.com/auth/youtubepartner-channel-audit","https://www.googleapis.com/auth/youtubepartner"]
+
 
 
 def main():
     ## Supports only mp4 Files
     #Variables
+    scopes = ["https://www.googleapis.com/auth/youtube.upload","https://www.googleapis.com/auth/youtubepartner-channel-audit","https://www.googleapis.com/auth/youtubepartner"]
     BUCKET_NAME = 'test-turnthebus-upload'
     OBJECT_KEY = 'TestYoutube/Test_API.mp4'
     TEMP_FILE = 'Temp_S3File.mp4'
@@ -90,6 +91,7 @@ def main():
             if status:
                 print("Uploaded %d%%." % int(status.progress() * 100))
             print("Upload Complete!")
+            print(response)
         
         #response = request.execute()
         
@@ -97,6 +99,7 @@ def main():
         #print(response)
         return {
             'statusCode': 200,
+            'video_id': response['id'],
             'body': json.dumps('File ' + OBJECT_KEY + ' Uploaded')
         }
     else:
