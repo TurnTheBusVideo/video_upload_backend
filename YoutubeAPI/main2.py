@@ -13,8 +13,8 @@
 
 import os
 import boto3
-import json
-# import google_auth_oauthlib.flow
+import json 
+import google_auth_oauthlib.flow
 from googleapiclient import discovery
 # import googleapiclient.errors
 
@@ -30,7 +30,8 @@ from googleapiclient.http import MediaFileUpload
 def main():
     ## Supports only mp4 Files
     #Variables
-    scopes = ["https://www.googleapis.com/auth/youtube.upload","https://www.googleapis.com/auth/youtubepartner-channel-audit","https://www.googleapis.com/auth/youtubepartner"]
+    #scopes = ["https://www.googleapis.com/auth/youtube.upload","https://www.googleapis.com/auth/youtubepartner-channel-audit","https://www.googleapis.com/auth/youtubepartner"]
+    scopes = ["https://www.googleapis.com/auth/youtube.upload"]
     BUCKET_NAME = 'test-turnthebus-upload'
     OBJECT_KEY = 'TestYoutube/Test_API.mp4'
     TEMP_FILE = 'Temp_S3File.mp4'
@@ -44,14 +45,20 @@ def main():
     api_service_name = "youtube"
     api_version = "v3"
     SERVICE_ACCOUNT_FILE = "videopipeline-71f56f9de636.json"
-    credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=scopes)
-    delegated_credentials = credentials.with_subject('ann@turnthebus.org')
+
+    client_secrets_file = "client_secret_oayth_ttb.apps.googleusercontent.com.json"
+    #credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=scopes)
+    #delegated_credentials = credentials.with_subject('ann@turnthebus.org')
+
+    flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
+         client_secrets_file, scopes)
+    #flow.redirect_uri = 'https://developers.google.com/oauthplayground'
+
+    delegated_credentials = flow.run_console()
+    
     youtube = discovery.build(
         api_service_name, api_version, credentials=delegated_credentials)
     # Code for S3
-    
-    
-
 
     S3 = boto3.resource('s3')
     s3_client = boto3.client('s3')
