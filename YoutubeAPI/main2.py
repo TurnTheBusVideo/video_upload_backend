@@ -15,6 +15,7 @@ import os
 import boto3
 import json 
 import google_auth_oauthlib.flow
+import pickle
 from googleapiclient import discovery
 # import googleapiclient.errors
 
@@ -50,11 +51,17 @@ def main():
     #credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=scopes)
     #delegated_credentials = credentials.with_subject('ann@turnthebus.org')
 
-    flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
-         client_secrets_file, scopes)
-    #flow.redirect_uri = 'https://developers.google.com/oauthplayground'
+    if os.path.exists('token.pickle'):
+        with open('token.pickle', 'rb') as token:
+            delegated_credentials = pickle.load(token)
+    else: 
+        flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(client_secrets_file, scopes)
+        #flow.redirect_uri = 'https://developers.google.com/oauthplayground'
 
-    delegated_credentials = flow.run_console()
+        delegated_credentials = flow.run_console()
+
+        with open('token.pickle', 'wb') as token:
+                pickle.dump(delegated_credentials, token)
     
     youtube = discovery.build(
         api_service_name, api_version, credentials=delegated_credentials)
