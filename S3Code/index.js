@@ -35,7 +35,7 @@ exports.handler =
 
     const data = {
       fileName,
-      uploadID: uuid(),
+      uploadID: fileName,
       AWS_REGION: awsRegion,
       s3URL: `https://${bucket}.s3.amazonaws.com/${fileName}`,
       Bucket: bucket,
