@@ -4,3 +4,4 @@ client_secret*
 *.mp4
 *.zip
 
+S3Code/node_modules
