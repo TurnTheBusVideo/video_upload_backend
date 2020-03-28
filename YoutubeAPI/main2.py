@@ -40,7 +40,9 @@ def main():
     VIDEO_DESCRIPTION = 'Awesome'
     VIDEO_CHANNEL = 'UCWuYgDOn2z66ZnUNmCTP0ig'
     TAGS = ["S3", "Test"]
-
+    #BOARD = 'Bihar'
+    #CLASS = 'XII'
+    #LANGUAGE = 'Test'
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
     api_service_name = "youtube"
@@ -50,7 +52,16 @@ def main():
     client_secrets_file = "client_secret_oayth_ttb.apps.googleusercontent.com.json"
     #credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=scopes)
     #delegated_credentials = credentials.with_subject('ann@turnthebus.org')
+    
+    #YOUTUBE_CHANNEL = BOARD + CLASS + LANGUAGE
+    # if YOUTUBE_CHANNEL = "":
+    #     token_pickle = 'token.pickle'
+    #     VIDEO_CHANNEL = 'UCWuYgDOn2z66ZnUNmCTP0ig'
+    # else:
+    #     token_pickle = 'token.pickle'
+    #     VIDEO_CHANNEL = 'UCWuYgDOn2z66ZnUNmCTP0ig'
 
+    # Update code below to use token.pickle as a variable
     if os.path.exists('token.pickle'):
         with open('token.pickle', 'rb') as token:
             delegated_credentials = pickle.load(token)

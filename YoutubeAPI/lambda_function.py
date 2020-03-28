@@ -18,6 +18,10 @@ import google_auth_oauthlib.flow
 from googleapiclient import discovery
 import pickle
 import googleapiclient.errors
+import logging
+
+from botocore.exceptions import ClientError
+import botocore.errorfactory
 
 from google.oauth2 import service_account
 
@@ -25,32 +29,68 @@ from google.oauth2 import service_account
 from googleapiclient.http import MediaFileUpload
 
 #scopes = ["https://www.googleapis.com/auth/youtube.upload"]
+S3 = boto3.resource('s3')
+s3_client = boto3.client('s3')
 
-
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 def lambda_handler(event, context):
     ## Supports only mp4 Files
     #Variables
     #scopes = ["https://www.googleapis.com/auth/youtube.upload","https://www.googleapis.com/auth/youtubepartner-channel-audit","https://www.googleapis.com/auth/youtubepartner"]
-    scopes = ["https://www.googleapis.com/auth/youtube.upload"]
-    BUCKET_NAME = event['BUCKET_NAME'] #'test-turnthebus-upload'
-    OBJECT_KEY = event['OBJECT_KEY'] #'TestYoutube/Test_API.mp4'
-    TEMP_FILE = '/tmp/Temp_S3File.mp4'
-    VIDEO_TITLE = event['VIDEO_TITLE'] #'Test'
-    VIDEO_DESCRIPTION = event['VIDEO_DESCRIPTION'] #'Awesome'
-    VIDEO_CHANNEL = event['VIDEO_CHANNEL'] #'UCWuYgDOn2z66ZnUNmCTP0ig'
-    TAGS = event['TAGS']#["S3", "Test"]
+    logger.info(json.dumps(event))
+    AWS_REGION = 'ap-south-1'
+    VIDEO_CHANNEL = 'UCWuYgDOn2z66ZnUNmCTP0ig'
+    dynamodb = boto3.resource('dynamodb', region_name=AWS_REGION)
+    table = dynamodb.Table('UploadVideo')
+    OBJECT_KEY =  event['responsePayload']['OBJECT_KEY']
 
+    scopes = ["https://www.googleapis.com/auth/youtube.upload"]
+
+    try:
+        response = table.get_item(
+            Key={
+                'uploadID': OBJECT_KEY
+                }
+        )
+    except ClientError as e:
+        print(e.response['Error']['Message'])
+    else:
+        item = response['Item']
+        BUCKET_NAME = item['Bucket']
+        TEMP_FILE = '/tmp/Temp_S3File.mp4'
+        #BUCKET_NAME = event['BUCKET_NAME'] #'test-turnthebus-upload'
+        #OBJECT_KEY = event['OBJECT_KEY'] #'TestYoutube/Test_API.mp4'
+    
+        VIDEO_TITLE = item['videoTitle']#event['VIDEO_TITLE'] #'Test'
+        VIDEO_DESCRIPTION = item['videoDescription']#event['VIDEO_DESCRIPTION'] #'Awesome' 
+        TAGS = item['Tags']# event['TAGS']#["S3", "Test"]
+        #BOARD = item['Board']
+        #CLASS = item['Class']
+        #LANGUAGE = item['Language']
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
     api_service_name = "youtube"
     api_version = "v3"
     SERVICE_ACCOUNT_FILE = "videopipeline-71f56f9de636.json"
     client_secrets_file = "client_secret_oayth_ttb.apps.googleusercontent.com.json"
-
+    
     #credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=scopes)
     #delegated_credentials = credentials.with_subject('ann@turnthebus.org')
 
+    #Add Logic to get diff channels (Diff pickle files)
+    #token_pickleX, VIDEO_CHANNEL X
+
+    #YOUTUBE_CHANNEL = BOARD + CLASS + LANGUAGE
+    # if YOUTUBE_CHANNEL = "":
+    #     token_pickle = 'token.pickle'
+    #     VIDEO_CHANNEL = 'UCWuYgDOn2z66ZnUNmCTP0ig'
+    # else:
+    #     token_pickle = 'token.pickle'
+    #     VIDEO_CHANNEL = 'UCWuYgDOn2z66ZnUNmCTP0ig'
+
+    # Update code below to use token.pickle as a variable
     if os.path.exists('token.pickle'):
         with open('token.pickle', 'rb') as token:
             delegated_credentials = pickle.load(token)
@@ -67,9 +107,12 @@ def lambda_handler(event, context):
         api_service_name, api_version, credentials=delegated_credentials)
     # Code for S3
     
-    S3 = boto3.resource('s3')
-    s3_client = boto3.client('s3')
-    
+    if not file_in_s3(OBJECT_KEY, BUCKET_NAME):
+        comment = "File %s not found" % OBJECT_KEY
+        return {
+            'statusCode': 404,
+            'body': json.dumps(comment )
+        }
     if OBJECT_KEY[-4:].lower() == ".mp4":
         s3_client.download_file(BUCKET_NAME, OBJECT_KEY, TEMP_FILE)
     # End of Code for S3
@@ -103,17 +146,38 @@ def lambda_handler(event, context):
         while response is None:
             status, response = request.next_chunk()
             if status:
+
                 print("Uploaded %d%%." % int(status.progress() * 100))
-            print("Upload Complete!")
-        print(response)
-        
+            #print("Upload Complete!")
+            logger.info("Upload Complete for file %s!" % OBJECT_KEY)
+        #print(response)
+        logger.info(json.dumps(response))
+        video_id = response['id']
+        youtube_url = "https://www.youtube.com/watch?v=" + video_id
         #response = request.execute()
         
+        try:
+            response = table.update_item(
+                Key={
+                    'uploadID': OBJECT_KEY
+                },
+                UpdateExpression="set youtubeURL = :u,youtubeID = :y",
+                ExpressionAttributeValues={
+                    ':u': youtube_url,
+                    ':y': video_id
+                },
+                ReturnValues="UPDATED_NEW"
+            )
+        except ClientError as e:
+            print(e.response['Error']['Message'])
+        else:
+            logger.info("Updated Key %s in DB " % OBJECT_KEY)
         #Add code to delete File after upload
         #print(response)
         return {
             'statusCode': 200,
-            'video_id': response['id'],
+            'video_id': video_id,
+            'youtube_url': youtube_url,
             'body': json.dumps('File ' + OBJECT_KEY + ' Uploaded')
         }
     else:
@@ -121,3 +185,14 @@ def lambda_handler(event, context):
             'statusCode': 400,
             'body': json.dumps('File ' + OBJECT_KEY + ' is not in mp4')
         }
+
+def file_in_s3(file_name, bucket_name):
+    try:
+        response = s3_client.get_object(Bucket= bucket_name, Key=file_name)
+        return (response is not None) and ('Body' in response) and (response['Body'] is not None)
+
+    except ClientError as e:
+        if e.response['Error']['Code'] == 'NoSuchKey':
+            return False
+        else:
+            raise e
