@@ -1,4 +1,3 @@
-const { getSignedUrl } = require('./getSignedUrl');
 const { putIntoDynamo } = require('./dynamo');
 
 exports.handler = 
@@ -21,11 +20,12 @@ async (event) => {
 
   const signedURL = getSignedUrl(fileName, bucket);
 
-  const data = { fileName, course, section, subsection, notes };
+  const data = { fileName, course, section, subsection, notes, uploadID: uuid(), 
+    S3URL: `https://${bucket}.s3.amazonaws.com/${fileName}` };
 
   console.log(JSON.stringify(data));
 
-  await putIntoDynamo('Upload', data);
+  await putIntoDynamo('UploadVideo', data);
 
   console.log(JSON.stringify(data));
 
