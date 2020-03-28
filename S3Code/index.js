@@ -31,15 +31,15 @@ async (event) => {
 
   console.log(JSON.stringify(data));
 
-  const args = {
-    BUCKET_NAME: bucket,
-    OBJECT_KEY: fileName,
-    TEMP_FILE: 'Temp_S3File.mp4',
-    VIDEO_TITLE: 'Test',
-    VIDEO_DESCRIPTION: 'Awesome',
-    VIDEO_CHANNEL: 'UCWuYgDOn2z66ZnUNmCTP0ig',
-    TAGS: ["S3", "Test"]
-  };
+  // const args = {
+  //   BUCKET_NAME: bucket,
+  //   OBJECT_KEY: fileName,
+  //   TEMP_FILE: 'Temp_S3File.mp4',
+  //   VIDEO_TITLE: 'Test',
+  //   VIDEO_DESCRIPTION: 'Awesome',
+  //   VIDEO_CHANNEL: 'UCWuYgDOn2z66ZnUNmCTP0ig',
+  //   TAGS: ["S3", "Test"]
+  // };
 
   // const result = await invokeLambda({
   //   FunctionName: 'S3toYoutube',
