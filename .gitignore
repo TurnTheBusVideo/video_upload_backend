@@ -3,4 +3,5 @@ videopipeline-71f56f9de636.json
 client_secret*
 *.mp4
 *.zip
-
+token.pickle
+*.pickle
