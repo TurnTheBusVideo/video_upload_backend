@@ -5,3 +5,5 @@ client_secret*
 *.zip
 token.pickle
 *.pickle
+S3Code/node_modules
+rootkey.csv

@@ -1,55 +1,95 @@
+const { uuid } = require('uuidv4');
+const { putIntoDynamo } = require('./dynamo');
 const { getSignedUrl } = require('./getSignedUrl');
 
-exports.handler = 
+exports.handler =
 
-async (event) => {
-  let responseCode = 200;
-  console.log("request: " + JSON.stringify(event));
-  
-  
-  if (event.headers) {
+  async (event) => {
+    let responseCode = 200;
+    console.log("request: " + JSON.stringify(event));
+
+    if (event.headers) {
       console.log("Received headers: " + event.headers);
-  }
+    }
 
+    const fileName = event.queryStringParameters.key;
 
-  const fileName = event.queryStringParameters.key;
-  const bucket = event.queryStringParameters.bucket;
+    const {
+      bucket,
+      classN,
+      stream,
+      board,
+      bookName,
+      bookPartName,
+      chapterName,
+      chapterNumber,
+      chapterPart,
+      section,
+      title,
+      description,
+      videoLanguage,
+      awsRegion
+    } = event.queryStringParameters;
 
-  bucket
+    const signedURL = getSignedUrl(fileName, bucket);
 
-  const signedURL = getSignedUrl(fileName, bucket);
+    const data = {
+      fileName,
+      uploadID: fileName,
+      AWS_REGION: awsRegion,
+      s3URL: `https://${bucket}.s3.amazonaws.com/${fileName}`,
+      Bucket: bucket,
+      classN,
+      stream,
+      board,
+      bookName,
+      bookPartName,
+      chapterName,
+      chapterNumber,
+      chapterPart,
+      section,
+      videoTitle: title,
+      videoDescription: description,
+      videoLanguage
+    };
 
-  // const args = {
-  //   BUCKET_NAME: bucket,
-  //   OBJECT_KEY: fileName,
-  //   TEMP_FILE: 'Temp_S3File.mp4',
-  //   VIDEO_TITLE: 'Test',
-  //   VIDEO_DESCRIPTION: 'Awesome',
-  //   VIDEO_CHANNEL: 'UCWuYgDOn2z66ZnUNmCTP0ig',
-  //   TAGS: ["S3", "Test"]
-  // };
+    console.log(JSON.stringify(data));
 
-  // const result = await invokeWorkerLambda({
-  //   FunctionName: 'S3toYoutube',
-  //   Payload: JSON.stringify(args),
-  // });
+    await putIntoDynamo('UploadVideo', data);
 
-  const responseBody = {
-    signedURL: signedURL,
-  };
+    console.log(JSON.stringify(data));
 
-  const response = {
+    // const args = {
+    //   BUCKET_NAME: bucket,
+    //   OBJECT_KEY: fileName,
+    //   TEMP_FILE: 'Temp_S3File.mp4',
+    //   VIDEO_TITLE: 'Test',
+    //   VIDEO_DESCRIPTION: 'Awesome',
+    //   VIDEO_CHANNEL: 'UCWuYgDOn2z66ZnUNmCTP0ig',
+    //   TAGS: ["S3", "Test"]
+    // };
+
+    // const result = await invokeLambda({
+    //   FunctionName: 'S3toYoutube',
+    //   Payload: JSON.stringify(args),
+    // });
+
+    const responseBody = {
+      signedURL: signedURL,
+    };
+
+    const response = {
       statusCode: responseCode,
       body: JSON.stringify(responseBody),
       headers: {
-        'Content-Type': 'application/json', 
+        'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': '*'
       }
+    };
+    console.log("response: " + JSON.stringify(response))
+    return response;
   };
-  console.log("response: " + JSON.stringify(response))
-  return response;
-};
 
 
 

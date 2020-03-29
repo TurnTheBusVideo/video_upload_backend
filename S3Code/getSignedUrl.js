@@ -1,7 +1,4 @@
 const AWS = require('aws-sdk');
-const fs = require('fs');
-
-const BUCKET_NAME = 'test-turnthebus-upload';
 
 const s3 = new AWS.S3({
   accessKeyId: '...',
