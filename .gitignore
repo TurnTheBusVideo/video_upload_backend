@@ -4,3 +4,4 @@ client_secret*
 *.mp4
 *.zip
 token.pickle
+*.pickle
