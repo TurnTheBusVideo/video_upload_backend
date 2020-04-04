@@ -50,7 +50,8 @@ exports.handler =
       section,
       videoTitle: title,
       videoDescription: description,
-      videoLanguage
+      videoLanguage,
+      Tags: ['Turn the bus', 'educational', 'tutorial', 'tutor', 'education']
     };
 
     console.log(JSON.stringify(data));
