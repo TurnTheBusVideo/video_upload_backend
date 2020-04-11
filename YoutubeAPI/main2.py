@@ -37,12 +37,12 @@ def main():
     OBJECT_KEY = 'TestYoutube/Test_API.mp4'
     TEMP_FILE = 'Temp_S3File.mp4'
     VIDEO_TITLE = 'Test'
-    VIDEO_DESCRIPTION = 'Awesome'
+    VIDEO_DESCRIPTION = 'Just Testing'
     VIDEO_CHANNEL = 'UCWuYgDOn2z66ZnUNmCTP0ig'
     TAGS = ["S3", "Test"]
-    #BOARD = 'Bihar'
-    #CLASS = 'XII'
-    #LANGUAGE = 'Test'
+    BOARD = 'Bihar'
+    CLASS = 'XII'
+    LANGUAGE = 'Main'
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
     api_service_name = "youtube"
@@ -53,17 +53,18 @@ def main():
     #credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=scopes)
     #delegated_credentials = credentials.with_subject('ann@turnthebus.org')
     
-    #YOUTUBE_CHANNEL = BOARD + CLASS + LANGUAGE
-    # if YOUTUBE_CHANNEL = "":
-    #     token_pickle = 'token.pickle'
-    #     VIDEO_CHANNEL = 'UCWuYgDOn2z66ZnUNmCTP0ig'
-    # else:
-    #     token_pickle = 'token.pickle'
-    #     VIDEO_CHANNEL = 'UCWuYgDOn2z66ZnUNmCTP0ig'
+    YOUTUBE_CHANNEL = BOARD + CLASS + LANGUAGE
+    
+    if YOUTUBE_CHANNEL == "BiharXIITest":
+        token_pickle = 'token.pickle'
+        VIDEO_CHANNEL = 'UCWuYgDOn2z66ZnUNmCTP0ig'
+    else:
+        token_pickle = 'token_main.pickle'
+        VIDEO_CHANNEL = 'UCc4rG0MP16xnAhMRJ4UWxTw'
 
     # Update code below to use token.pickle as a variable
-    if os.path.exists('token.pickle'):
-        with open('token.pickle', 'rb') as token:
+    if os.path.exists(token_pickle):
+        with open(token_pickle, 'rb') as token:
             delegated_credentials = pickle.load(token)
     else: 
         flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(client_secrets_file, scopes)
@@ -71,7 +72,7 @@ def main():
 
         delegated_credentials = flow.run_console()
 
-        with open('token.pickle', 'wb') as token:
+        with open(token_pickle, 'wb') as token:
                 pickle.dump(delegated_credentials, token)
     
     youtube = discovery.build(
@@ -102,7 +103,7 @@ def main():
                 "tags": TAGS
               },
               "status": {
-                "privacyStatus": "public"
+                "privacyStatus": "unlisted"
               }
             },
 

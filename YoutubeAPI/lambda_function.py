@@ -66,9 +66,9 @@ def lambda_handler(event, context):
         VIDEO_TITLE = item['videoTitle']#event['VIDEO_TITLE'] #'Test'
         VIDEO_DESCRIPTION = item['videoDescription']#event['VIDEO_DESCRIPTION'] #'Awesome' 
         TAGS = item['Tags']# event['TAGS']#["S3", "Test"]
-        #BOARD = item['Board']
-        #CLASS = item['Class']
-        #LANGUAGE = item['Language']
+        BOARD = item['board']
+        CLASS = item['classN']
+        LANGUAGE = item['videoLanguage']
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
     api_service_name = "youtube"
@@ -82,17 +82,17 @@ def lambda_handler(event, context):
     #Add Logic to get diff channels (Diff pickle files)
     #token_pickleX, VIDEO_CHANNEL X
 
-    #YOUTUBE_CHANNEL = BOARD + CLASS + LANGUAGE
-    # if YOUTUBE_CHANNEL = "":
-    #     token_pickle = 'token.pickle'
-    #     VIDEO_CHANNEL = 'UCWuYgDOn2z66ZnUNmCTP0ig'
-    # else:
-    #     token_pickle = 'token.pickle'
-    #     VIDEO_CHANNEL = 'UCWuYgDOn2z66ZnUNmCTP0ig'
+    YOUTUBE_CHANNEL = BOARD + CLASS + LANGUAGE
+    if YOUTUBE_CHANNEL == "Specific":
+        token_pickle = 'token.pickle'
+        VIDEO_CHANNEL = 'UCWuYgDOn2z66ZnUNmCTP0ig'
+    else:
+        token_pickle = 'token_main.pickle'
+        VIDEO_CHANNEL = 'UCc4rG0MP16xnAhMRJ4UWxTw'
 
     # Update code below to use token.pickle as a variable
-    if os.path.exists('token.pickle'):
-        with open('token.pickle', 'rb') as token:
+    if os.path.exists(token_pickle):
+        with open(token_pickle, 'rb') as token:
             delegated_credentials = pickle.load(token)
     else: 
         flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(client_secrets_file, scopes)
@@ -100,7 +100,7 @@ def lambda_handler(event, context):
 
         delegated_credentials = flow.run_console()
 
-        with open('token.pickle', 'wb') as token:
+        with open(token_pickle, 'wb') as token:
                 pickle.dump(delegated_credentials, token)
 
     youtube = discovery.build(
@@ -134,7 +134,7 @@ def lambda_handler(event, context):
                 "tags": TAGS
               },
               "status": {
-                "privacyStatus": "public"
+                "privacyStatus": "unlisted"
               }
             },
 
