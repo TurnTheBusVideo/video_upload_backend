@@ -1,5 +1,3 @@
-const { uuid } = require('uuidv4');
-const { putIntoDynamo } = require('./dynamo');
 const { getSignedUrl } = require('./getSignedUrl');
 
 exports.handler =
@@ -61,9 +59,6 @@ exports.handler =
 
     console.log(JSON.stringify(data));
 
-    // await putIntoDynamo('UploadVideo', data);
-
-    console.log(JSON.stringify(data));
 
     // const args = {
     //   BUCKET_NAME: bucket,
