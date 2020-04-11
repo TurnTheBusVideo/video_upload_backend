@@ -6,7 +6,7 @@ const lambda = new AWS.Lambda({
 });
 
 
-export const invokeLambda = (params = {}, originalRequest: any): Promise<LambdaResponse> => {
+export const w = (params = {}, originalRequest: any): Promise<LambdaResponse> => {
   const finalParams = {
     InvocationType: 'RequestResponse',
     ...params,

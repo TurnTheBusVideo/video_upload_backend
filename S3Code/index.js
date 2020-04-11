@@ -61,7 +61,7 @@ exports.handler =
 
     console.log(JSON.stringify(data));
 
-    await putIntoDynamo('UploadVideo', data);
+    // await putIntoDynamo('UploadVideo', data);
 
     console.log(JSON.stringify(data));
 
