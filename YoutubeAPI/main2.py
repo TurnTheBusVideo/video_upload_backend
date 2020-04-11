@@ -13,8 +13,9 @@
 
 import os
 import boto3
-import json
-# import google_auth_oauthlib.flow
+import json 
+import google_auth_oauthlib.flow
+import pickle
 from googleapiclient import discovery
 # import googleapiclient.errors
 
@@ -24,33 +25,59 @@ from google.oauth2 import service_account
 from googleapiclient.http import MediaFileUpload
 
 #scopes = ["https://www.googleapis.com/auth/youtube.upload"]
-scopes = ["https://www.googleapis.com/auth/youtube.upload","https://www.googleapis.com/auth/youtubepartner-channel-audit","https://www.googleapis.com/auth/youtubepartner"]
+
 
 
 def main():
     ## Supports only mp4 Files
     #Variables
+    #scopes = ["https://www.googleapis.com/auth/youtube.upload","https://www.googleapis.com/auth/youtubepartner-channel-audit","https://www.googleapis.com/auth/youtubepartner"]
+    scopes = ["https://www.googleapis.com/auth/youtube.upload"]
     BUCKET_NAME = 'test-turnthebus-upload'
     OBJECT_KEY = 'TestYoutube/Test_API.mp4'
     TEMP_FILE = 'Temp_S3File.mp4'
     VIDEO_TITLE = 'Test'
-    VIDEO_DESCRIPTION = 'Awesome'
+    VIDEO_DESCRIPTION = 'Just Testing'
     VIDEO_CHANNEL = 'UCWuYgDOn2z66ZnUNmCTP0ig'
     TAGS = ["S3", "Test"]
-
+    BOARD = 'Bihar'
+    CLASS = 'XII'
+    LANGUAGE = 'Main'
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
     api_service_name = "youtube"
     api_version = "v3"
     SERVICE_ACCOUNT_FILE = "videopipeline-71f56f9de636.json"
-    credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=scopes)
-    delegated_credentials = credentials.with_subject('ann@turnthebus.org')
+
+    client_secrets_file = "client_secret_oayth_ttb.apps.googleusercontent.com.json"
+    #credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=scopes)
+    #delegated_credentials = credentials.with_subject('ann@turnthebus.org')
+    
+    YOUTUBE_CHANNEL = BOARD + CLASS + LANGUAGE
+    
+    if YOUTUBE_CHANNEL == "BiharXIITest":
+        token_pickle = 'token.pickle'
+        VIDEO_CHANNEL = 'UCWuYgDOn2z66ZnUNmCTP0ig'
+    else:
+        token_pickle = 'token_main.pickle'
+        VIDEO_CHANNEL = 'UCc4rG0MP16xnAhMRJ4UWxTw'
+
+    # Update code below to use token.pickle as a variable
+    if os.path.exists(token_pickle):
+        with open(token_pickle, 'rb') as token:
+            delegated_credentials = pickle.load(token)
+    else: 
+        flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(client_secrets_file, scopes)
+        #flow.redirect_uri = 'https://developers.google.com/oauthplayground'
+
+        delegated_credentials = flow.run_console()
+
+        with open(token_pickle, 'wb') as token:
+                pickle.dump(delegated_credentials, token)
+    
     youtube = discovery.build(
         api_service_name, api_version, credentials=delegated_credentials)
     # Code for S3
-    
-    
-
 
     S3 = boto3.resource('s3')
     s3_client = boto3.client('s3')
@@ -76,7 +103,7 @@ def main():
                 "tags": TAGS
               },
               "status": {
-                "privacyStatus": "public"
+                "privacyStatus": "unlisted"
               }
             },
 
@@ -88,8 +115,9 @@ def main():
         while response is None:
             status, response = request.next_chunk()
             if status:
-                print "Uploaded %d%%." % int(status.progress() * 100)
-            print "Upload Complete!"
+                print("Uploaded %d%%." % int(status.progress() * 100))
+            print("Upload Complete!")
+            print(response)
         
         #response = request.execute()
         
@@ -97,6 +125,7 @@ def main():
         #print(response)
         return {
             'statusCode': 200,
+            'video_id': response['id'],
             'body': json.dumps('File ' + OBJECT_KEY + ' Uploaded')
         }
     else:
