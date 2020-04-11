@@ -29,6 +29,7 @@ exports.handler =
       chapterNumber,
       chapterPart,
       section,
+      tags,
       title,
       description,
       videoLanguage,
@@ -55,7 +56,7 @@ exports.handler =
       videoTitle: title,
       videoDescription: description,
       videoLanguage,
-      Tags: ['Turn the bus', 'educational', 'tutorial', 'tutor', 'education']
+      Tags: tags.split(',')
     };
 
     console.log(JSON.stringify(data));
