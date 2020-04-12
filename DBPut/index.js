@@ -29,6 +29,9 @@ exports.handler =
       awsRegion
     } = event.queryStringParameters;
 
+    const tagsString = tags && typeof tags === 'string' ? tags : "Turn the bus, educational, tutorial, tutor, education";
+    const trimmedTagsArray = tagsString.split(',').map(word => word.trim());
+
     const data = {
       fileName,
       uploadID: fileName,
@@ -47,14 +50,14 @@ exports.handler =
       videoTitle: title,
       videoDescription: description,
       videoLanguage,
-      Tags: tags.split(',')
+      Tags: trimmedTagsArray
     };
 
-    console.log(JSON.stringify(data));
+    console.log('Writing to DB', JSON.stringify(data));
 
     await putIntoDynamo('UploadVideo', data);
 
-    console.log(JSON.stringify(data));
+    console.log('DB write successful', JSON.stringify(data));
     
     const response = {
       statusCode: responseCode,
