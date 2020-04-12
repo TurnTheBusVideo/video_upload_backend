@@ -1,8 +1,12 @@
 const AWS = require('aws-sdk');
+const fs = require('fs');
+
+let rawConfig = fs.readFileSync('config.json');
+let jsonConfig = JSON.parse(rawConfig);
 
 const s3 = new AWS.S3({
-  accessKeyId: 'AKIAJDIDCWJIC5L6ABBA',
-  secretAccessKey: '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'
+  accessKeyId: jsonConfig.accessKeyId,
+  secretAccessKey: jsonConfig.secretAccessKey
 });
 
 const getSignedUrl = (fileName, bucketName) => {

@@ -7,3 +7,4 @@ token.pickle
 *.pickle
 S3Code/node_modules
 rootkey.csv
+S3Code/config.json
