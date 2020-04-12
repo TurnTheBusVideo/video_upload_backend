@@ -77,6 +77,7 @@ exports.handler =
 
     const responseBody = {
       signedURL: signedURL,
+      fileName: fileName
     };
 
     const response = {
