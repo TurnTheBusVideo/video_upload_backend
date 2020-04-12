@@ -13,10 +13,10 @@ exports.handler =
        result = await scanTable(tableName);
     } catch (err) {
       responseCode = 500;
-      console.log();
+      console.log('Error scanning table!');
     }
 
-    console.log(JSON.stringify(result));
+    console.log('Result', JSON.stringify(result));
 
     const responseBody = {
       result,
