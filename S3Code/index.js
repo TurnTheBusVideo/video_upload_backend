@@ -16,6 +16,8 @@ exports.handler =
     const fileExtension = splitFileNameArry.pop();
     const fileName = name + '_' + Date.now() + '.' + fileExtension;
 
+    const { bucket } = event.queryStringParameters;
+
     const signedURL = getSignedUrl(fileName, bucket);
 
     const responseBody = {
