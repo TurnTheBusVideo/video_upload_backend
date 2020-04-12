@@ -13,9 +13,9 @@ const scanTable = (tableName) => {
       Select: 'ALL_ATTRIBUTES',
       ConsistentRead : false,
     }, (err, data) => {
-      logger.debug('In dynamo return function');
+      console.log('In dynamo return function');
       if (err) {
-        logger.debug('Error in scanTable', err);
+        console.log('Error in scanTable', err);
         reject(err);
       }
       fulfill(data);
