@@ -1,4 +1,4 @@
-const { putIntoDynamo } = require('./dynamo');
+const { scanTable } = require('./dynamo');
 
 exports.handler =
 
