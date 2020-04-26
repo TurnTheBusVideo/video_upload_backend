@@ -3,7 +3,9 @@ import codecs
     
 ## Phrase contains start_time, end_time and the max 10 word text
 def generate_phrases(transcript):
-    ts = json.load(transcript)
+    with open(transcript) as f:
+        ts = json.load(f)
+    #ts = json.load(transcript)
     items = ts['results']['items']
 
     phrase =  {}
@@ -17,6 +19,7 @@ def generate_phrases(transcript):
         if nPhrase == True:
             if item["type"] == "pronunciation":
                 phrase["start_time"] = get_time_code(float(item["start_time"]))
+                phrase["end_time"] = get_time_code(float(item["end_time"]))
                 nPhrase = False
         else:
             # We need to determine if this pronunciation or puncuation here
@@ -61,6 +64,7 @@ def generate_srt_from_phrases(phrases):
 
     for phrase in phrases:
         tokens.append(str(c))
+        print(phrase["start_time"])
         tokens.append(phrase["start_time"] + " --> " + phrase["end_time"])
         tokens.append(" ".join(phrase["words"]))
         tokens.append("\n")
@@ -82,4 +86,6 @@ def get_time_code(seconds):
 if __name__ == "__main__":
     phrases = generate_phrases('/Users/annsarapaul/GitHub/TTB:video_upload_backend/Sample Video/TTB_12_Hindi_Sampoorn_Kranti_NPO_Part_1__Final__1587422077475_1587424530_transcript_job.json')
     print(phrases)
+    output = generate_srt_from_phrases(phrases)
+    print(output)
 

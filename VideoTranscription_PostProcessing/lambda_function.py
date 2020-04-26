@@ -150,6 +150,7 @@ def generate_phrases(transcript):
         if nPhrase == True:
             if item["type"] == "pronunciation":
                 phrase["start_time"] = get_time_code(float(item["start_time"]))
+                phrase["end_time"] = get_time_code(float(item["end_time"]) )
                 nPhrase = False         
         else:    
             # We need to determine if this pronunciation or puncuation here
