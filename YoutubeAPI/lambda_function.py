@@ -40,11 +40,17 @@ def lambda_handler(event, context):
     #Variables
     #scopes = ["https://www.googleapis.com/auth/youtube.upload","https://www.googleapis.com/auth/youtubepartner-channel-audit","https://www.googleapis.com/auth/youtubepartner"]
     logger.info(json.dumps(event))
+    
     AWS_REGION = 'ap-south-1'
     VIDEO_CHANNEL = 'UCWuYgDOn2z66ZnUNmCTP0ig'
     dynamodb = boto3.resource('dynamodb', region_name=AWS_REGION)
     table = dynamodb.Table('UploadVideo')
-    OBJECT_KEY =  event['responsePayload']['OBJECT_KEY']
+
+    assert event is not None and event['Records'] is not None
+    db_entry_type =  event['Records'][0]['eventName']
+    if db_entry_type == "INSERT":
+        OBJECT_KEY = event['Records'][0]['dynamodb']['Keys']['uploadID']['S']
+    #OBJECT_KEY =  event['responsePayload']['OBJECT_KEY']
 
     scopes = ["https://www.googleapis.com/auth/youtube.upload"]
 
