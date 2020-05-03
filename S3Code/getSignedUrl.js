@@ -12,9 +12,11 @@ const s3 = new AWS.S3({
 const getSignedUrl = (fileName, bucketName) => {
   const params = {
     Bucket: bucketName,
-    Key: fileName
+    Fields: {
+      key: fileName
+    },
   };
-  return s3.getSignedUrl('putObject', params);
+  return s3.createPresignedPost(params);
 }
 
 module.exports = {
