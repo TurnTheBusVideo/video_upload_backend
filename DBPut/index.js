@@ -13,6 +13,8 @@ exports.handler =
 
     const {
       bucket,
+      tutorName,
+      tutorProfile,
       classN,
       stream,
       board,
@@ -30,7 +32,17 @@ exports.handler =
     } = event.queryStringParameters;
 
     const tagsString = tags && typeof tags === 'string' ? tags : "Turn the bus, educational, tutorial, tutor, education";
-    const trimmedTagsArray = tagsString.split(',').map(word => word.trim());
+    let trimmedTagsArray = tagsString.split(',').map(word => word.trim());
+
+    const fieldsAsTag = ['bookName', 'classN', 'board', 'chapterName']
+    fieldsAsTag.forEach(fieldAsTag => {
+      let fieldValue = event.queryStringParameters[fieldAsTag];
+      console.log('Trying to add tag >>>', fieldValue);
+      if(fieldValue && fieldValue.length && fieldValue.trim()) {
+        trimmedTagsArray.push(fieldValue);
+        console.log('Added');
+      }
+    });
 
     const data = {
       fileName,
@@ -38,6 +50,8 @@ exports.handler =
       AWS_REGION: awsRegion,
       s3URL: `https://${bucket}.s3.amazonaws.com/${fileName}`,
       Bucket: bucket,
+      tutorName,
+      tutorProfile,
       classN,
       stream,
       board,
