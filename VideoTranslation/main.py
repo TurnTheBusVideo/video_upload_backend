@@ -8,6 +8,11 @@ import subprocess
 from tempfile import gettempdir
 import json
 
+# FFMPEG command
+#ffmpeg -f concat -i audiofiles.txt -c copy output.mp3
+# audio
+#ffmpeg -f lavfi -i anullsrc=r=44100:cl=mono:sample_rate=22050 -t <seconds> -q:a 9 -acodec libmp3lame out.mp3
+#ffmpeg -i "Vectors what even are they.mp4" -i output.mp3 -c:v copy -map 0:v:0 -map 1:a:0 new_video.mp4
 session = Session()
 polly = session.client("polly")
 
@@ -96,18 +101,20 @@ for item in data['results']['items']:
         phrase['end_time'] = item['end_time']
     elif (item['type'] == 'pronunciation'):
         phrase['word'] = phrase['word'] + ' ' + item['alternatives'][0]['content']
-        phrase['end_time'] = item['end_time']
-    elif (len(phrase) != 0):
+        phrase['end_time'] = item['end_time']        
+    elif (len(phrase) != 0) & (item['alternatives'][0]['content'] == '.'):
         #End of Phrase
         phrases.append(phrase)
         phrase = {}
+    elif (len(phrase) != 0):
+        phrase['word'] = phrase['word'] + ' ' + item['alternatives'][0]['content']
 
 i = 1
 for phrase in phrases:
     phrase['duration'] = (float(phrase['end_time']) - float(phrase['start_time']))*1000
     result = translate.translate_text(Text=phrase['word'], SourceLanguageCode="en", TargetLanguageCode="hi")
     phrase['translation'] = result.get('TranslatedText')
-    phrase['audiofile'] = 'speech_' + str(i) + ".mp3"
+    phrase['audiofile'] = 'speech_' + str(i).zfill(4) + ".mp3"
     speech_generation(phrase['translation'],phrase['duration'],phrase['audiofile'])
     i = i +1
 with open('/Users/annsarapaul/GitHub/TTB:video_upload_backend/Sample Video/translate_output.json', 'w',encoding='utf8') as outfile:
