@@ -68,8 +68,9 @@ def lambda_handler(event, context):
         TEMP_FILE = '/tmp/Temp_S3File.mp4'
         #BUCKET_NAME = event['BUCKET_NAME'] #'test-turnthebus-upload'
         #OBJECT_KEY = event['OBJECT_KEY'] #'TestYoutube/Test_API.mp4'
-    
+        
         VIDEO_TITLE = item['chapterPart'] + '|' + item['chapterNumber'] + '|' + item['videoTitle'] + '|' + item['bookPartName'] + '|' + item['bookName'] + '|' + item['classN']#event['VIDEO_TITLE'] #'Test'
+        logger.info("Video Title: " + VIDEO_TITLE)
         VIDEO_DESCRIPTION = item['videoDescription']  + ' - ' + item['board'] + ' - ' + item['bookName']  + ' - ' + item['bookPartName']  + '|' + item['chapterName']  + '|' + item['chapterNumber']  + '|' + item['chapterPart']  + '|' + item['classN']  + '|' + item['tutorName']  + '|' + item['videoLanguage']  + '|' + item['videoTitle'] #event['VIDEO_DESCRIPTION'] #'Awesome' 
         TAGS = item['Tags']# event['TAGS']#["S3", "Test"]
         BOARD = item['board']
