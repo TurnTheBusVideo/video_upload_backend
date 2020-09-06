@@ -73,7 +73,12 @@ def lambda_handler(event, context):
             item['bookPartName'] = ''
         if item['videoDescription'] == 'NULL':
             item['videoDescription'] = ''
-        VIDEO_TITLE = item['chapterPart'] + ' ' + item['chapterNumber'] + ' ' + item['videoTitle'] + ' ' + item['bookPartName'] + ' ' + item['bookName'] + ' ' + item['classN']#event['VIDEO_TITLE'] #'Test'
+        VIDEO_TITLE = item['chapterPart'] +
+                      ' CH ' + item['chapterNumber'] +
+                      ' ' + item['videoTitle'] +
+                      ' ' + item['bookPartName'] +
+                      ' ' + item['bookName'] +
+                      ' ' + item['classN']#event['VIDEO_TITLE'] #'Test'
         if len(VIDEO_TITLE) >= 100:
             VIDEO_TITLE = VIDEO_TITLE[:100]
         logger.info("Video Title: " + VIDEO_TITLE)
