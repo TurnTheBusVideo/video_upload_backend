@@ -55,7 +55,9 @@ def process_record(record):
             'body': json.dumps(e.response['Error']['Message'])
         }
 
-    item = clean_fields(response['Item'])
+    logger.info(response)
+    item = response['Item'] 
+    clean_fields(item)
     bucket_name = item["Bucket"]
 
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
@@ -79,7 +81,7 @@ def is_mp4(upload_id):
 
 
 def clean_fields(item):
-    for k, v in item.iteritems():
+    for k, v in item.items():
         if v == 'NULL':
             item[k] = ''
 
@@ -152,7 +154,7 @@ def upload_video(item, upload_id):
 
     video_description = get_video_description(item)
     tags = item['Tags']  # event['TAGS']#["S3", "Test"]
-    temp_file = = '/tmp/Temp_S3File.mp4'
+    temp_file = '/tmp/Temp_S3File.mp4'
     s3_client.download_file(item["Bucket"], upload_id, temp_file)
     # End of Code for S3
     media = MediaFileUpload(temp_file, resumable=True)
