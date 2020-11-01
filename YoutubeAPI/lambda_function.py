@@ -134,70 +134,91 @@ def lambda_handler(event, context):
     if OBJECT_KEY[-4:].lower() == ".mp4":
         s3_client.download_file(BUCKET_NAME, OBJECT_KEY, TEMP_FILE)
     # End of Code for S3
-        media = MediaFileUpload(TEMP_FILE,resumable=True)
-        request = youtube.videos().insert(
-            part="snippet, status",
-            #onBehalfOfContentOwnerChannel = "UCWuYgDOn2z66ZnUNmCTP0ig",
-            #onBehalfOfContentOwner = "ann@turnthebus.org",
-            #onBehalfOfContentOwner = "WuYgDOn2z66ZnUNmCTP0ig",
-            #onBehalfOfContentOwner = "c4rG0MP16xnAhMRJ4UWxTw",
-            #onBehalfOfContentOwnerChannel = "UCc4rG0MP16xnAhMRJ4UWxTw",
-            body={
-              "snippet": {
-                "title": VIDEO_TITLE,
-                "description": VIDEO_DESCRIPTION,
-                "categoryId": "22",
-                "channelId": VIDEO_CHANNEL,
-                #"channelId": "UCc4rG0MP16xnAhMRJ4UWxTw",
-                "tags": TAGS
-              },
-              "status": {
-                "privacyStatus": "unlisted"
-              }
-            },
-
-            #media_body=MediaFileUpload("Test_API.mp4")
-            media_body = media
-        )
-        
-        response = None
-        while response is None:
-            status, response = request.next_chunk()
-            if status:
-
-                print("Uploaded %d%%." % int(status.progress() * 100))
-            #print("Upload Complete!")
-            logger.info("Upload Complete for file %s!" % OBJECT_KEY)
-        #print(response)
-        logger.info(json.dumps(response))
-        video_id = response['id']
-        youtube_url = "https://www.youtube.com/watch?v=" + video_id
-        #response = request.execute()
-        
         try:
-            response = table.update_item(
-                Key={
-                    'uploadID': OBJECT_KEY
+            media = MediaFileUpload(TEMP_FILE,resumable=True)
+            request = youtube.videos().insert(
+                part="snippet, status",
+                #onBehalfOfContentOwnerChannel = "UCWuYgDOn2z66ZnUNmCTP0ig",
+                #onBehalfOfContentOwner = "ann@turnthebus.org",
+                #onBehalfOfContentOwner = "WuYgDOn2z66ZnUNmCTP0ig",
+                #onBehalfOfContentOwner = "c4rG0MP16xnAhMRJ4UWxTw",
+                #onBehalfOfContentOwnerChannel = "UCc4rG0MP16xnAhMRJ4UWxTw",
+                body={
+                "snippet": {
+                    "title": VIDEO_TITLE,
+                    "description": VIDEO_DESCRIPTION,
+                    "categoryId": "22",
+                    "channelId": VIDEO_CHANNEL,
+                    #"channelId": "UCc4rG0MP16xnAhMRJ4UWxTw",
+                    "tags": TAGS
                 },
-                UpdateExpression="set youtubeURL = :u,youtubeID = :y",
-                ExpressionAttributeValues={
-                    ':u': youtube_url,
-                    ':y': video_id
+                "status": {
+                    "privacyStatus": "unlisted"
+                }
                 },
-                ReturnValues="UPDATED_NEW"
+
+                #media_body=MediaFileUpload("Test_API.mp4")
+                media_body = media
             )
-        except ClientError as e:
-            print(e.response['Error']['Message'])
-        else:
-            logger.info("Updated Key %s in DB " % OBJECT_KEY)
-        #Add code to delete File after upload
-        #print(response)
-        return {
-            'statusCode': 200,
-            'video_id': video_id,
-            'youtube_url': youtube_url,
-            'body': json.dumps('File ' + OBJECT_KEY + ' Uploaded')
-        }
+            
+            response = None
+            while response is None:
+                status, response = request.next_chunk()
+                if status:
+
+                    print("Uploaded %d%%." % int(status.progress() * 100))
+                #print("Upload Complete!")
+                logger.info("Upload Complete for file %s!" % OBJECT_KEY)
+            #print(response)
+            logger.info(json.dumps(response))
+            video_id = response['id']
+            youtube_url = "https://www.youtube.com/watch?v=" + video_id
+            #response = request.execute()
+            
+            try:
+                response = table.update_item(
+                    Key={
+                        'uploadID': OBJECT_KEY
+                    },
+                    UpdateExpression="set youtubeURL = :u,youtubeID = :y,youtubeUploadStatus = :s",
+                    ExpressionAttributeValues={
+                        ':u': youtube_url,
+                        ':y': video_id,
+                        ':s': 'UPLOADED'
+                    },
+                    ReturnValues="UPDATED_NEW"
+                )
+            except ClientError as e:
+                print(e.response['Error']['Message'])
+            else:
+                logger.info("Updated Key %s in DB " % OBJECT_KEY)
+            #Add code to delete File after upload
+            #print(response)
+            return {
+                'statusCode': 200,
+                'video_id': video_id,
+                'youtube_url': youtube_url,
+                'body': json.dumps('File ' + OBJECT_KEY + ' Uploaded')
+            }
+        except:
+            e = sys.exc_info()[0]
+            try:
+                response = table.update_item(
+                    Key={
+                        'uploadID': OBJECT_KEY
+                    },
+                    UpdateExpression="set youtubeUploadStatus = :s",
+                    ExpressionAttributeValues={
+                        ':s': str(e),
+                    },
+                    ReturnValues="UPDATED_NEW"
+                )
+            except ClientError as e:
+                print(e.response['Error']['Message'])
+            return {
+                'statusCode': 400,
+                'body': json.dumps('Error uploading ' + OBJECT_KEY + ' to Youtube')
+            }
     else:
         return {
             'statusCode': 400,
